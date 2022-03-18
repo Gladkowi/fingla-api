@@ -20,9 +20,6 @@ export class UserService {
 		if (!regModel.password) {
 			return 'Password can\'t be empty';
 		}
-		if (!regModel.role && regModel.role !== 'user') {
-			return 'Role can\'t be empty';
-		}
 		if (regModel.email) {
 			const emailRule =
 				/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -64,7 +61,6 @@ export class UserService {
 				newUser.email = regModel.email;
 			}
 			newUser.phone = regModel.phone;
-			newUser.role = regModel.role;
 			newUser.password = await this.getPasswordHash(regModel.password);
 			await this.user.insert(newUser);
 			delete newUser.password;

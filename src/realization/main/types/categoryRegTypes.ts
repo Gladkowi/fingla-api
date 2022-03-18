@@ -6,9 +6,6 @@ export class CategoryRegTypes {
     groupId?: number;
 
     @ApiProperty()
-    userId: number;
-
-    @ApiProperty()
     name: string;
 
     @ApiProperty({nullable: true})

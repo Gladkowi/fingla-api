@@ -1,8 +1,8 @@
 import { CategoryTypeEnum } from "./categoryType.enum";
 
 export class CategoryClass {
-    group?: number;
-    user: number;
+    groupId?: number;
+    userId: number;
     name: string;
     limit?: number;
     color: string;

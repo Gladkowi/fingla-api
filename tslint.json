@@ -32,7 +32,12 @@
     "class-name": true,
     "file-name-casing": [
       true,
-      "kebab-case"
+      "camel-case"
+    ],
+    "variable-name": [
+      true,
+      "check-format",
+      "allow-snake-case"
     ],
     "prefer-switch": [
       true,
