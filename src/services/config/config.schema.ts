@@ -43,6 +43,11 @@ const config = convict({
     format: 'url',
     default: 'http://localhost:3000'
   },
+  frontend_url: {
+    doc: ' front-end url',
+    format: 'url',
+    default: 'http://localhost:3000'
+  },
   ip: {
     doc: 'The IP address to bind.',
     format: 'ipaddress',
@@ -97,6 +102,18 @@ const config = convict({
       default: 10,
       format: Number
     },
+  },
+  storage: {
+    store: {
+      doc: 'Path to storage all files',
+      default: '/tmp',
+      format: String
+    },
+    maxFileSizeBytes: {
+      doc: 'Maximum file size in bytes',
+      default: 1048576,
+      format: Number
+    }
   },
   db: {
     type: {
