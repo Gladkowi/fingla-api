@@ -1,73 +1,109 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Fingla API 
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
+## Структура
 
 ```bash
-$ npm install
+.
+├── src
+│   ├── auth                          - Модуль авторизации
+│   │   ├── decorators
+│   │   │   └── roles.decorator.ts    - Декоратор управления ролями
+│   │   ├── dtos
+│   │   │   └── login.dto.ts          - Интерфейс логина
+│   │   │   └── create-user.dto.ts    - Интерфейс регистрации
+│   │   ├── guards
+│   │   │   ├── jwt-auth.guard.ts     - Гвард аутентификации JWT-токена
+│   │   │   └── roles.guard.ts        - Гвард авторизации по ролям
+│   │   ├── interfaces                - Описания интерфейсов авторизации
+│   │   │   ├── jwt-payload.interface.ts
+│   │   │   └── signin.interface.ts
+│   │   ├── validation                - Валидация
+│   │   │   ├── password.regex.ts
+│   │   │   └── phone.regex.ts
+│   │   ├── auth.controller.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   └── jwt.strategy.ts           - Стратегия passport.js для JWT-токенов
+│   ├── core                          - Глобальные классы программы
+│   │   ├── http.exceptions.ts
+│   │   ├── db.exceptions.ts
+│   ├── db
+│   │   ├── migrations                  - Миграции баз данных
+│   │   │   └── 1562660623110-Init.ts
+│   ├── service                          - Утилиты
+│   │   ├── config                   
+│   │   │   ├── config.module.ts
+│   │   │   ├── config.schema.ts      - Схема конфигурации convict
+│   │   │   └── config.service.ts
+│   │   ├── mailer                   
+│   │   │   ├── providers 
+│   │   │   │   ├── basemail.provider.ts 
+│   │   │   │   ├── mailgun.provider.ts 
+│   │   │   │   └── stdout.provider.ts 
+│   │   │   ├── mailer.module.ts
+│   │   │   └── mailer.template.ts
+│   ├── user                         - Пользователи
+│   │   ├── decorators
+│   │   │   └── user.decorators.ts
+│   │   ├── dtos
+│   │   │   ├── link.dto.ts
+│   │   │   └── params.dto.ts
+│   │   ├── role.enum.ts
+│   │   ├── user.controller.ts      - Контроллер
+│   │   ├── user.entity.ts          - Модель ORM
+│   │   ├── user.module.ts
+│   │   └── user.service.ts
+│   ├── app.module.ts         - Корневой модуль. 
+│   ├── main.ts               - Точка входа
+├── tsconfig.build.json
+├── tsconfig.json
+├── tslint.json
+├── config.example.toml      - Пример конфигурации                                
+├── nest-cli.json
+├── nodemon-debug.json
+├── nodemon.json
+├── package.json
+├── package-lock.json
+├── README.md                - Этот файл
 ```
 
-## Running the app
+# Требования
+
+- node `= 16.5.0`
+- npm `= 7.19.1`
+- PostgreSQL `= 14 (14.1-1.pgdg110+1)`
+
+# Установка
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ npm ci
 ```
 
-## Test
+# Операции
 
+## Первичная установка
+
+1. Создание конфигурации
+    - Создать `config.toml`
+    - Используйте `config.schema.ts`, чтобы найти необходимые параметры.
+    - Установите необходимые параметры в `config.toml`, предоставьте все секреты окружения, если это возможно. Имена переменных доступны в схеме конфигурации.
+
+2. Запустите начальную миграцию
+    - `$ npm run migrations: run`
+
+### Продакшн
+
+- Выполнение миграций
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ npm run migrate:prod
 ```
 
-## Support
+### Файл конфигурации
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Общая конфигурация и/или конфигурация разработки должны быть описаны в файле `config.toml`. Пример файла `config.example.toml`
 
-## Stay in touch
+## Swagger
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Swagger UI доступен по заданому в конфигурации пути по умолчанию используется `/doc`
 
-## License
-
-Nest is [MIT licensed](LICENSE).
+`GET /doc`

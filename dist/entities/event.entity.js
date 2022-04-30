@@ -36,8 +36,8 @@ __decorate([
     __metadata("design:type", Number)
 ], EventEntity.prototype, "value", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true, type: "timestamptz" }),
-    __metadata("design:type", Date)
+    typeorm_1.Column({ nullable: true, type: "date" }),
+    __metadata("design:type", String)
 ], EventEntity.prototype, "date", void 0);
 EventEntity = __decorate([
     typeorm_1.Entity('events')

@@ -6,5 +6,5 @@ export declare class EventEntity {
     mark: MarkEntity;
     comment: string;
     value: number;
-    date: Date;
+    date: string;
 }

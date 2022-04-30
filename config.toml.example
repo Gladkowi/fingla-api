@@ -1,0 +1,35 @@
+env = "development"
+port = "5000"
+tz = "utc"
+main_url = "http://192.168.1.33:5000/api"
+frontend_url = "http://192.168.1.33:3000"
+
+[jwt]
+expires_in = 259200
+secret = "secretKey"
+
+[db]
+type = "mysql"
+host = "127.0.0.1"
+port = "3306"
+username = "root"
+password = "root"
+database = "db"
+synchronize = false
+debug = false
+logging = false
+
+[storage]
+store = "/"
+maxFileSizeBytes = 1048576
+
+[swagger]
+ui_path = "/doc"
+
+[mailgun]
+domain = "---"
+api_key = "---"
+emailFrom = "---"
+
+[user]
+minutes_last_change_request = 10

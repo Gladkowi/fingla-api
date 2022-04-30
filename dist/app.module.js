@@ -9,21 +9,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const config_1 = require("@nestjs/config");
-const auth_module_1 = require("./realization/auth/auth.module");
-const core_1 = require("@nestjs/core");
-const all_exceptions_filter_1 = require("./core/all-exceptions.filter");
-const main_module_1 = require("./realization/main/main.module");
+const auth_module_1 = require("./auth/auth.module");
+const auth_service_1 = require("./auth/auth.service");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     common_1.Module({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true }),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
                 host: process.env.POSTGRES_HOST,
-                port: parseInt(process.env.POSTGRES_PORT),
+                port: +process.env.POSTGRES_PORT,
                 username: process.env.POSTGRES_USER,
                 password: process.env.POSTGRES_PASSWORD,
                 database: process.env.POSTGRES_DATABASE,
@@ -31,15 +27,9 @@ AppModule = __decorate([
                 synchronize: true,
             }),
             auth_module_1.AuthModule,
-            main_module_1.MainModule,
         ],
         controllers: [],
-        providers: [
-            {
-                provide: core_1.APP_FILTER,
-                useClass: all_exceptions_filter_1.AllExceptionsFilter,
-            },
-        ],
+        providers: [auth_service_1.AuthService]
     })
 ], AppModule);
 exports.AppModule = AppModule;

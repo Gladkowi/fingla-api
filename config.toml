@@ -1,0 +1,35 @@
+env = "development"
+port = "5000"
+tz = "utc"
+main_url = "http://192.168.1.33:5000/api"
+frontend_url = "http://192.168.1.33:3000"
+
+[jwt]
+expires_in = 259200
+secret = "secretKey"
+
+[db]
+type = "postgres"
+host = "localhost"
+port = "5432"
+username = "postgres"
+password = "Heccrbq123!"
+database = "fingla"
+synchronize = true
+debug = false
+logging = false
+
+[storage]
+store = "/"
+maxFileSizeBytes = 1048576
+
+[swagger]
+ui_path = "/doc"
+
+[mailgun]
+domain = "demo2.42px.org"
+api_key = "---"
+emailFrom = "meow@demo2.42px.org"
+
+[user]
+minutes_last_change_request = 10

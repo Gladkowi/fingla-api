@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MarkEntity = void 0;
 const typeorm_1 = require("typeorm");
 const event_entity_1 = require("./event.entity");
-const user_entity_1 = require("./user.entity");
+const user_entity_1 = require("../user/user.entity");
 let MarkEntity = class MarkEntity {
 };
 __decorate([
@@ -24,8 +24,8 @@ __decorate([
     __metadata("design:type", Array)
 ], MarkEntity.prototype, "events", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => user_entity_1.UsersEntity, user => user.marks),
-    __metadata("design:type", user_entity_1.UsersEntity)
+    typeorm_1.ManyToOne(() => user_entity_1.UserEntity, user => user.marks),
+    __metadata("design:type", user_entity_1.UserEntity)
 ], MarkEntity.prototype, "user", void 0);
 __decorate([
     typeorm_1.Column(),

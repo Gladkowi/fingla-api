@@ -1,33 +1,26 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './realization/auth/auth.module';
-import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './core/all-exceptions.filter';
-import { MainModule } from "./realization/main/main.module";
+import { AuthModule } from './auth/auth.module';
+import { AuthService } from './auth/auth.service';
+import { ConfigService } from './services/config/config.service';
+import { MailerModule } from './services/mailer/mailer.module';
+import { UserModule } from './user/user.module';
+import { UserEntity } from './user/user.entity';
 
 @Module({
-	imports: [
-		ConfigModule.forRoot({ isGlobal: true }),
-		TypeOrmModule.forRoot({
-			type: 'postgres',
-			host: process.env.POSTGRES_HOST,
-			port: parseInt(<string>process.env.POSTGRES_PORT),
-			username: process.env.POSTGRES_USER,
-			password: process.env.POSTGRES_PASSWORD,
-			database: process.env.POSTGRES_DATABASE,
-			autoLoadEntities: true,
-			synchronize: true,
-		}),
-		AuthModule,
-		MainModule,
-	],
-	controllers: [],
-	providers: [
-		{
-			provide: APP_FILTER,
-			useClass: AllExceptionsFilter,
-		},
-	],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useExisting: ConfigService
+    }),
+    AuthModule,
+    UserModule,
+    MailerModule,
+    // CategoryModule,
+  ],
+  providers: [AuthService]
 })
-export class AppModule { }
+export class AppModule {
+}

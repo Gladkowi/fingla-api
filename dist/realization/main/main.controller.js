@@ -11,6 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MainController = void 0;
 const common_1 = require("@nestjs/common");
@@ -24,40 +33,57 @@ let MainController = class MainController {
         this.eventService = eventService;
         this.categoryService = categoryService;
     }
-    async createEvent(req, newEvent) {
-        const errorMessage = await this.eventService.validateEvent(newEvent);
-        if (errorMessage) {
-            throw new common_1.HttpException(errorMessage, common_1.HttpStatus.BAD_REQUEST);
-        }
-        const errorAccess = await this.eventService.validateAccess(req.user.id, newEvent.categoryId, newEvent.markId);
-        if (errorAccess) {
-            throw new common_1.HttpException(`${errorAccess}`, common_1.HttpStatus.NOT_FOUND);
-        }
-        return await this.eventService.create(newEvent);
+    createEvent(req, newEvent) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const errorMessage = yield this.eventService.validateEvent(newEvent);
+            if (errorMessage) {
+                throw new common_1.HttpException(errorMessage, common_1.HttpStatus.BAD_REQUEST);
+            }
+            const errorAccess = yield this.eventService.validateAccess(req.user.id, newEvent.categoryId, newEvent.markId);
+            if (errorAccess) {
+                throw new common_1.HttpException(`${errorAccess}`, common_1.HttpStatus.NOT_FOUND);
+            }
+            return yield this.eventService.create(newEvent);
+        });
     }
-    async createCategory(req, newCategory) {
-        const errorMessage = await this.categoryService.validateCategory(newCategory);
-        if (errorMessage) {
-            throw new common_1.HttpException(errorMessage, common_1.HttpStatus.BAD_REQUEST);
-        }
-        return await this.categoryService.create(req.user.id, newCategory);
+    createCategory(req, newCategory) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const errorMessage = yield this.categoryService.validateCategory(newCategory);
+            if (errorMessage) {
+                throw new common_1.HttpException(errorMessage, common_1.HttpStatus.BAD_REQUEST);
+            }
+            return yield this.categoryService.create(req.user.id, newCategory);
+        });
     }
-    async getCategory(req, id) {
-        return await this.categoryService.getCategory(id);
+    getCategory(req, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.categoryService.getCategory(id);
+        });
     }
-    async getCategories(req) {
-        return await this.categoryService.getCategories();
+    getCategories(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield this.categoryService.getCategories(req.user.id);
+            }
+            catch (e) {
+                throw new common_1.HttpException(`${e}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        });
     }
-    async getEvents(req) {
-        return await this.eventService.getEvents();
+    getEvents(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.eventService.getEvents();
+        });
     }
-    async gant(req, time) {
-        try {
-            return await this.eventService.gant(req.user.id, time);
-        }
-        catch (e) {
-            throw new common_1.HttpException(`${e}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    gant(req, time) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield this.eventService.gant(req.user.id, time);
+            }
+            catch (e) {
+                throw new common_1.HttpException(`${e}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        });
     }
 };
 __decorate([

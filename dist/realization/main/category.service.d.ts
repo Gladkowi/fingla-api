@@ -7,5 +7,5 @@ export declare class CategoryService {
     validateCategory(category: CategoryRegTypes): Promise<string>;
     create(id: number, category: CategoryRegTypes): Promise<any>;
     getCategory(id: number): Promise<any>;
-    getCategories(): Promise<any>;
+    getCategories(userId: number): Promise<any>;
 }

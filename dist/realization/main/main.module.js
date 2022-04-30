@@ -16,12 +16,13 @@ const mark_entity_1 = require("../../entities/mark.entity");
 const group_entity_1 = require("../../entities/group.entity");
 const category_entity_1 = require("../../entities/category.entity");
 const category_service_1 = require("./category.service");
+const user_entity_1 = require("../../user/user.entity");
 let MainModule = class MainModule {
 };
 MainModule = __decorate([
     common_1.Module({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([event_entity_1.EventEntity, mark_entity_1.MarkEntity, group_entity_1.GroupEntity, category_entity_1.CategoryEntity])
+            typeorm_1.TypeOrmModule.forFeature([event_entity_1.EventEntity, mark_entity_1.MarkEntity, group_entity_1.GroupEntity, category_entity_1.CategoryEntity, user_entity_1.UserEntity])
         ],
         providers: [event_service_1.EventService, category_service_1.CategoryService],
         controllers: [main_controller_1.MainController],

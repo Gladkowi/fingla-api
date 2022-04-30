@@ -11,6 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryService = void 0;
 const common_1 = require("@nestjs/common");
@@ -24,44 +33,57 @@ let CategoryService = class CategoryService {
     constructor(category) {
         this.category = category;
     }
-    async validateCategory(category) {
-        if (!category.name) {
-            return 'name can\'t be empty';
-        }
-        if (!category.type) {
-            return 'type can\'t be empty';
-        }
-        return '';
+    validateCategory(category) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!category.name) {
+                return 'name can\'t be empty';
+            }
+            if (!category.type) {
+                return 'type can\'t be empty';
+            }
+            return '';
+        });
     }
-    async create(id, category) {
-        const result = new response_class_1.RegistrationRespModel();
-        const newCategory = new category_class_1.CategoryClass();
-        newCategory.groupId = category.groupId;
-        newCategory.userId = id;
-        newCategory.name = category.name;
-        newCategory.limit = category.limit;
-        newCategory.color = category.color;
-        newCategory.type = categoryType_enum_1.CategoryTypeEnum.expense;
-        await this.category.insert(newCategory);
-        result.successStatus = true;
-        result.message = 'Success';
-        return result;
+    create(id, category) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = new response_class_1.RegistrationRespModel();
+            const newCategory = new category_class_1.CategoryClass();
+            newCategory.groupId = category.groupId;
+            newCategory.userId = id;
+            newCategory.name = category.name;
+            newCategory.limit = category.limit;
+            newCategory.color = category.color;
+            newCategory.type = categoryType_enum_1.CategoryTypeEnum.expense;
+            yield this.category.insert(newCategory);
+            result.successStatus = true;
+            result.message = 'Success';
+            return result;
+        });
     }
-    async getCategory(id) {
-        const result = new response_class_1.RegistrationRespModel();
-        const events = await this.category.findOne(id, { relations: ['events'] });
-        result.successStatus = true;
-        result.message = 'Success';
-        result.data = events;
-        return result;
+    getCategory(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = new response_class_1.RegistrationRespModel();
+            const events = yield this.category.findOne(id, { relations: ['events'] });
+            result.successStatus = true;
+            result.message = 'Success';
+            result.data = events;
+            return result;
+        });
     }
-    async getCategories() {
-        const result = new response_class_1.RegistrationRespModel();
-        const categories = await this.category.find();
-        result.successStatus = true;
-        result.message = 'Success';
-        result.data = categories;
-        return result;
+    getCategories(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = new response_class_1.RegistrationRespModel();
+            const categories = yield this.category
+                .find({
+                where: {
+                    user: userId
+                }
+            });
+            result.successStatus = true;
+            result.message = 'Success';
+            result.data = categories;
+            return result;
+        });
     }
 };
 CategoryService = __decorate([
