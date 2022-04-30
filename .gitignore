@@ -4,7 +4,7 @@ node_modules/
 build/
 tmp/
 temp/
-dist/
+dist
 storage/
 error.log
 .config.toml
