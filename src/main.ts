@@ -23,7 +23,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
   .setTitle('Fingla API')
   .setDescription('Fingla is a finance application for users')
-  .setVersion('0.1.1')
+  .setVersion('0.2.1')
   .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(configService.get('swagger.ui_path'), app, document);

@@ -3,8 +3,8 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 
-@Entity('categories')
-export class CategoryEntity {
+@Entity('chats')
+export class ChatEntity {
   @PrimaryGeneratedColumn()
   id: number;
 }

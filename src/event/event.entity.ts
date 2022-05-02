@@ -3,8 +3,8 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 
-@Entity('categories')
-export class CategoryEntity {
+@Entity('events')
+export class EventEntity {
   @PrimaryGeneratedColumn()
   id: number;
 }
