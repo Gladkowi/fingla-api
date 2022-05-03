@@ -1,11 +1,11 @@
-.idea/
+.idea
 .vscode/
 node_modules/
 build/
 tmp/
 temp/
-dist
-storage/
+dist/*
+storage
 error.log
 .config.toml
 ormconfig.json

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Param,
@@ -10,21 +11,23 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MessageService } from './message.service';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateMessageDto } from './dtos/create-message.dto';
 
 @ApiTags('Message in Chat')
 @Controller('chat/:chatId')
 export class MessageController {
   constructor(
-    private messageService: MessageService,
+    private messageService: MessageService
   ) { }
 
   @Post('message')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   sendMessage(
-    @Param('chatId', ParseIntPipe) id: number
+    @Param('chatId', ParseIntPipe) id: number,
+    @Body() body: CreateMessageDto
   ) {
-
+    return this.messageService.createMessage(body)
   }
 
   @Put('message/:messageId')

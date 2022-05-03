@@ -34,7 +34,9 @@ export class UserEntity {
   })
   phone: string;
 
-  @Column()
+  @Column({
+    select: false
+  })
   password: string;
 
   @Column('enum', {
@@ -76,7 +78,8 @@ export class UserEntity {
 
   @Column('timestamptz', {
     nullable: true,
-    name: 'email_change_requested_at'
+    name: 'email_change_requested_at',
+    select: false
   })
   emailChangeRequestedAt: Date | null;
 
@@ -91,13 +94,18 @@ export class UserEntity {
   @Column('timestamptz', {
     default: () => 'CURRENT_TIMESTAMP',
     nullable: false,
-    name: 'password_reset_requested_at'
+    name: 'password_reset_requested_at',
+    select: false
   })
   passwordResetRequestedAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    select: false
+  })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    select: false
+  })
   updatedAt: Date;
 }

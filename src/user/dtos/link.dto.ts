@@ -1,5 +1,6 @@
 import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
-import { IsString } from 'class-validator';
+import { IsString, Matches } from 'class-validator';
+import { isPasswordRegex } from '../../auth/validation/password.regex';
 
 export class LinkConfirmMailDto {
   @ApiModelProperty()
@@ -10,5 +11,6 @@ export class LinkConfirmMailDto {
 export class SetNewPasswordDto {
   @ApiModelProperty()
   @IsString()
+  @Matches(isPasswordRegex)
   password: string;
 }

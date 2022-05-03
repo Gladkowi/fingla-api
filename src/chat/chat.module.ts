@@ -6,15 +6,22 @@ import { ChatEntity } from './chat.entity';
 import { MessageEntity } from './message/message.entity';
 import { MessageService } from './message/message.service';
 import { MessageController } from './message/message.controller';
+import { MessageGateway } from './message/message.gateway';
+import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../user/user.module';
+import { UserEntity } from '../user/user.entity';
 
 @Module({
   imports: [
+    AuthModule,
+    UserModule,
     TypeOrmModule.forFeature([
       ChatEntity,
-      MessageEntity
+      MessageEntity,
+      UserEntity
     ])
   ],
-  providers: [ChatService, MessageService],
+  providers: [ChatService, MessageService, MessageGateway],
   controllers: [ChatController, MessageController],
   exports: [ChatService, MessageService]
 })

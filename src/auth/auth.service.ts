@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user/user.entity';
@@ -16,7 +20,7 @@ export class AuthService {
   constructor(
     @InjectRepository(UserEntity) private user: Repository<UserEntity>,
     private readonly jwtService: JwtService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {
   }
 
@@ -27,17 +31,17 @@ export class AuthService {
   validateUser(payload: JwtPayload): Promise<any> {
     return this.user.findOne({
       where: {
-        phone: payload.phone
-      }
-    })
+        phone: payload.phone,
+      },
+    });
   }
 
   async registerUser(body: CreateUserDto) {
     const checkUser = await this.user
     .createQueryBuilder('usr')
-    .where('usr.phone = :phone', {phone: body.phone})
-    .orWhere('usr.email = :email', {email: body.email})
-    .getOne()
+    .where('usr.phone = :phone', { phone: body.phone })
+    .orWhere('usr.email = :email', { email: body.email })
+    .getOne();
     if (checkUser) {
       throw new AlreadyExists();
     }
@@ -46,10 +50,10 @@ export class AuthService {
     this.userService.getLinkForConfirmEmail(body.email).catch(e => console.log(e));
     const token = await this.getTokenByLoginPair({
       phone: body.phone,
-      password: pass
+      password: pass,
     });
     return {
-      token
+      token,
     };
   }
 
@@ -63,11 +67,11 @@ export class AuthService {
   async login(body: LoginDto) {
     const token = await this.getTokenByLoginPair({
       phone: body.phone,
-      password: body.password
+      password: body.password,
     });
 
     return {
-      token
+      token,
     };
   }
 
@@ -80,9 +84,19 @@ export class AuthService {
   }
 
   async findByLoginPair(loginParam: SignIn) {
-    const user = await this.user.findOne({
-      phone: loginParam.phone
-    });
+    const user = await this.user.createQueryBuilder('usr')
+    .select([
+      'usr.id AS id',
+      'usr.name AS name',
+      'usr.password AS password',
+      'usr.email AS email',
+      'usr.role AS role',
+      'usr.phone AS phone',
+    ])
+    .where('usr.phone = :phone', {
+      phone: loginParam.phone,
+    })
+    .getRawOne();
     if (!user) return null;
     if (await argon2.verify(user.password, loginParam.password)) {
       return user;
@@ -97,8 +111,12 @@ export class AuthService {
     const payload: JwtPayload = {
       userid: user.id,
       phone: user.phone,
-      role: user.role
+      role: user.role,
     };
     return `${this.jwtService.sign(payload)}`;
+  }
+
+  verifyJwt(jwt: string) {
+    return this.jwtService.verifyAsync(jwt);
   }
 }

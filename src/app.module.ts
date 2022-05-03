@@ -11,6 +11,9 @@ import { CategoryModule } from './category/category.module';
 import { EventModule } from './event/event.module';
 import { ChatModule } from './chat/chat.module';
 import { AdminModule } from './admin/admin.module';
+import { GoalModule } from './goal/goal.module';
+import { SpendModule } from './plannedSpend/spend.module';
+import { AssetModule } from './asset/asset.module';
 
 @Module({
   imports: [
@@ -25,9 +28,14 @@ import { AdminModule } from './admin/admin.module';
     EventModule,
     ChatModule,
     AdminModule,
+    GoalModule,
+    SpendModule,
+    AssetModule,
     MailerModule,
   ],
-  providers: [AuthService]
+  providers: [
+    AuthService
+  ]
 })
 export class AppModule {
 }

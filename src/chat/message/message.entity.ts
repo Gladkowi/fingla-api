@@ -1,10 +1,31 @@
 import {
+  Column,
+  CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 @Entity('messages')
 export class MessageEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('increment')
   id: number;
+
+  @Column()
+  text: string;
+
+  @Column()
+  author: number;
+
+  @CreateDateColumn({
+    type: 'timestamptz',
+    name: 'created_at'
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamptz',
+    name: 'updated_at'
+  })
+  updatedAt: Date;
 }

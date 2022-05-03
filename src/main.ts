@@ -3,9 +3,13 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigModule } from './services/config/config.module';
 import { ConfigService } from './services/config/config.service';
+import { join } from 'path';
+import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './core/http.filter';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.select(ConfigModule).get(ConfigService);
   if (configService.get('db.cli.onlyExportConfig')) {
     await configService.exportTypeOrmConfig();
@@ -27,6 +31,14 @@ async function bootstrap() {
   .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(configService.get('swagger.ui_path'), app, document);
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.useStaticAssets(join(__dirname, '..', 'storage'), {
+    prefix: '/storage'
+  });
+
   await app.listen(configService.get('port'));
 }
 

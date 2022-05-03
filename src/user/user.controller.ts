@@ -1,10 +1,10 @@
 import {
   Body,
-  Controller,
+  Controller, Delete,
   Param,
   Patch,
   Post,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -69,5 +69,26 @@ export class UserController {
     @Param() params: ParamsDto
   ) {
     return this.userService.confirmEmail(params.code);
+  }
+
+  @Patch('/profile')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  updateUser() {
+
+  }
+
+  @Delete('')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  deleteUser() {
+
+  }
+
+  @Post('/password/change')
+  changePasswordForUser(
+    @Body() data: SetNewPasswordDto
+  ) {
+
   }
 }

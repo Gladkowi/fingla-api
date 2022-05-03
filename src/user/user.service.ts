@@ -22,6 +22,10 @@ export class UserService {
     return crypto.randomBytes(size).toString('hex');
   }
 
+  getUserById(id: number) {
+    return this.user.findOne(id)
+  }
+
   async getLinkForConfirmEmail(email: string) {
     const currentUser = await this.getUserByParam({email});
     if (!currentUser) {

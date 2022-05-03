@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -37,6 +38,14 @@ export class AdminController {
   unbanUser(
     @Param('userId', ParseIntPipe) id: number
   ) {
+
+  }
+
+  @Get('users')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  getUsers() {
 
   }
 }
