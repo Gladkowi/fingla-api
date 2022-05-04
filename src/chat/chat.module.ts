@@ -10,11 +10,13 @@ import { MessageGateway } from './message/message.gateway';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { UserEntity } from '../user/user.entity';
+import { HelperModule } from '../services/helper/helper.module';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    HelperModule,
     TypeOrmModule.forFeature([
       ChatEntity,
       MessageEntity,

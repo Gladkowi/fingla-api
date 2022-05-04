@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
+  JoinColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
+import { ChatEntity } from '../chat.entity';
 
 @Entity('messages')
 export class MessageEntity {
@@ -28,4 +31,19 @@ export class MessageEntity {
     name: 'updated_at'
   })
   updatedAt: Date;
+
+  @ManyToOne(
+    () => ChatEntity,
+      chat => chat.messages
+  )
+  @JoinColumn({
+    name: 'chat_id'
+  })
+  chat: ChatEntity;
+
+  @Column({
+    type: 'int',
+    name: 'chat_id'
+  })
+  chatId: number;
 }

@@ -20,7 +20,7 @@ debug = false
 logging = false
 
 [storage]
-store = "/"
+store = "storage"
 maxFileSizeBytes = 1048576
 
 [swagger]

@@ -1,17 +1,19 @@
 import {
-  ConnectedSocket, MessageBody,
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer,
+  WebSocketServer
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { MessageService } from './message.service';
 import { AuthService } from '../../auth/auth.service';
-import { UserService } from '../../user/user.service';
 import { Observable } from 'rxjs';
 import { CreateMessageDto } from './dtos/create-message.dto';
+import { ChatService } from '../chat.service';
+import { HelperService } from '../../services/helper/helper.service';
 
 @WebSocketGateway({
   cors: {
@@ -26,9 +28,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   connectedUsers: number[] = [];
 
   constructor(
+    private chatService: ChatService,
     private messageService: MessageService,
     private authService: AuthService,
-    private userService: UserService,
+    private helperService: HelperService
   ) {
   }
 
@@ -69,8 +72,9 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   @SubscribeMessage('message:get')
   async getMessages(
     @ConnectedSocket() client: Socket,
+    @MessageBody() id: number,
   ) {
-    const result = await this.messageService.getMessages();
+    const result = await this.messageService.getMessages(id);
     this.server.emit('message', result);
   }
 
@@ -108,7 +112,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const result = await this.messageService.createMessage({
       text: payload.text,
       author: user.userid,
-      roomId: payload.roomId
+      chatId: payload.chatId
     });
     this.server.emit('message', result);
   }
@@ -120,7 +124,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ) {
     await this.messageService.deleteMessage(id).then(() => {
       this.server.emit('remove', id);
-    });;
+    });
   }
 
   @SubscribeMessage('join')
@@ -130,18 +134,26 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ) {
     client.join(data[0]);
 
-    const messages = await this.messageService.getMessages();
+    // const messages = await this.messageService.getMessages();
 
     // Send last messages to the connected user
-    client.emit('message', messages);
+    // client.emit('message', messages);
   }
 
   @SubscribeMessage('leave')
   onRoomLeave(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: any,
+    @MessageBody() data: any
   ) {
     client.leave(data[0]);
+  }
+
+  @SubscribeMessage('chats:get')
+  async getChats(
+    @ConnectedSocket() client: Socket
+  ) {
+    const result = await this.chatService.getChats();
+    this.server.emit('chats', result.items);
   }
 }
 

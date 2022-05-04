@@ -14,8 +14,12 @@ export class MessageService {
     return this.message.save(body)
   }
 
-  getMessages() {
-    return this.message.find()
+  getMessages(id: number) {
+    return this.message.find({
+      where: {
+        chatId: id
+      }
+    })
   }
 
   deleteMessage(id: number) {

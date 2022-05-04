@@ -1,16 +1,16 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigModule } from './services/config/config.module';
 import { ConfigService } from './services/config/config.service';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './core/http.filter';
+import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const configService = app.select(ConfigModule).get(ConfigService);
+  const configApp = await NestFactory.create(ConfigModule);
+  const configService = configApp.select(ConfigModule).get(ConfigService);
   if (configService.get('db.cli.onlyExportConfig')) {
     await configService.exportTypeOrmConfig();
     console.log(
@@ -18,6 +18,7 @@ async function bootstrap() {
     );
     process.exit();
   }
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: ['http://192.168.1.49:3000', 'http://localhost:3000', 'http://192.168.1.33:3000'],

@@ -8,7 +8,7 @@ export class CreateMessageDto {
 
   @ApiModelProperty()
   @IsNumber()
-  roomId: number;
+  chatId: number;
 
   @ApiModelProperty()
   @IsNumber()
