@@ -8,11 +8,15 @@ import { SetNewPasswordDto } from './dtos/link.dto';
 import { AuthService } from '../auth/auth.service';
 import { UserEntity } from './user.entity';
 import { ConfigService } from '../services/config/config.service';
+import { ChatEntity } from '../chat/chat.entity';
+import { CategoryEntity } from '../category/category.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity) private user: Repository<UserEntity>,
+    @InjectRepository(CategoryEntity) private category: Repository<CategoryEntity>,
+    @InjectRepository(ChatEntity) private chat: Repository<ChatEntity>,
     private readonly mailerService: IBaseMailService,
     private readonly configService: ConfigService
   ) {
@@ -145,5 +149,33 @@ export class UserService {
     );
   }
 
+  async getHomePage(userId: number) {
+    const categories = await this.category
+    .createQueryBuilder('c')
+    .select([
+      'c.id AS id',
+      'c.name AS name',
+      'c.limit AS limit',
+      'c.preview AS preview',
+      'c.color AS color'
+    ])
+    .addSelect('SUM(e.sum)', 'value')
+    .leftJoin('c.events', 'e')
+    .where('user_id = :id', {
+      id: userId,
+    })
+    .where('c.limit IS NOT NULL')
+    .limit(6)
+    .groupBy('c.id')
+    .getRawMany();
 
+    const chats = await this.chat.find({
+      take: 6
+    });
+
+    return {
+      categories,
+      chats
+    };
+  }
 }

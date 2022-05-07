@@ -9,14 +9,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
-import { SubCategoryEntity } from './subCategory.entity';
+import { CategoryEntity } from './category.entity';
 import { getLink } from '../core/storage';
 import { EventEntity } from '../event/event.entity';
-import { UserEntity } from '../user/user.entity';
-import { CategoryTypeEnum } from './enums/category-type.enum';
 
-@Entity('categories')
-export class CategoryEntity {
+@Entity('sub_categories')
+export class SubCategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -42,12 +40,6 @@ export class CategoryEntity {
   limit: number | null;
 
   @Column({
-    type: 'enum',
-    enum: CategoryTypeEnum
-  })
-  type: CategoryTypeEnum;
-
-  @Column({
     type: 'varchar',
     length: 25,
     nullable: true
@@ -65,29 +57,23 @@ export class CategoryEntity {
   })
   updatedAt: Date;
 
-  @OneToMany(
-    () => SubCategoryEntity,
-    subCategories => subCategories.category,
+  @ManyToOne(
+    () => CategoryEntity,
+    category => category.subCategories,
   )
-  subCategories: SubCategoryEntity[];
+  @JoinColumn({
+    name: 'category_id',
+  })
+  category: CategoryEntity;
+
+  @Column({
+    name: 'category_id',
+  })
+  categoryId: number;
 
   @OneToMany(
     () => EventEntity,
-    event => event.category,
+    event => event.subCategory,
   )
   events: EventEntity[];
-
-  @ManyToOne(
-    () => UserEntity,
-    user => user.categories,
-  )
-  @JoinColumn({
-    name: 'user_id'
-  })
-  user: UserEntity;
-
-  @Column({
-    name: 'user_id'
-  })
-  userId: number;
 }

@@ -3,9 +3,10 @@ import {
   Column,
   Entity,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn, OneToMany,
 } from 'typeorm';
 import { Role } from './role.enum';
+import { CategoryEntity } from '../category/category.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -98,6 +99,12 @@ export class UserEntity {
     select: false
   })
   passwordResetRequestedAt: Date;
+
+  @OneToMany(
+    () => CategoryEntity,
+    category => category.user
+  )
+  categories: CategoryEntity[]
 
   @CreateDateColumn({
     select: false

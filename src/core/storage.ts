@@ -4,12 +4,13 @@ import { extname } from 'path';
 import { HttpStatus } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions/http.exception';
 import { ConfigService } from '../services/config/config.service';
+import path = require('path');
 
 const configService = new ConfigService();
 
 export const saveFileToStorage = {
   limits: {
-    fileSize: configService.get('storage.maxFileSizeBytes')
+    fileSize: configService.get('storage.maxFileSizeBytes'),
   },
   storage: diskStorage({
     destination: async (req: any, file: any, callback: any) => {
@@ -17,7 +18,7 @@ export const saveFileToStorage = {
     },
     filename: (req: any, file: any, callback: any) => {
       callback(null, `${uuid()}${extname(file.originalname)}`);
-    }
+    },
   }),
   fileFilter: (req: any, file: any, callback: any) => {
     if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
@@ -27,5 +28,11 @@ export const saveFileToStorage = {
         `Unsupported file type ${extname(file.originalname)}`,
         HttpStatus.BAD_REQUEST), false);
     }
-  }
+  },
 };
+
+export function getLink(pathName: string) {
+  return new URL(
+    path.join(configService.get('storage.store'), pathName),
+    configService.get('main_url')).href;
+}

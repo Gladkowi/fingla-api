@@ -21,7 +21,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: ['http://192.168.1.49:3000', 'http://localhost:3000', 'http://192.168.1.33:3000'],
+    origin: ['http://192.168.1.39:3000', 'http://localhost:3000', 'http://192.168.1.33:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

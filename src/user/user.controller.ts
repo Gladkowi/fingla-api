@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller, Delete,
+  Controller, Delete, Get,
   Param,
   Patch,
   Post,
@@ -90,5 +90,14 @@ export class UserController {
     @Body() data: SetNewPasswordDto
   ) {
 
+  }
+
+  @Get('/home')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  getHomePages(
+    @User('id') userId: number,
+  ) {
+      return this.userService.getHomePage(userId);
   }
 }

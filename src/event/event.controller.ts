@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -6,11 +7,17 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { EventService } from './event.service';
+import { PaginationDto } from '../core/dtos/pagination.dto';
+import { CreateEventDto } from './dtos/create-event.dto';
+import { EventResponseDto, EventResponsePaginationDto } from './dtos/reesponses.dto';
+import { UpdateEventDto } from './dtos/update-event.dto';
+import { User } from '../user/decorators/user.decorator';
 
 @ApiTags('Events')
 @Controller()
@@ -20,44 +27,59 @@ export class EventController {
   ) {
   }
 
-  @Post('event')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  createEvent() {
-
-  }
-
   @Get('events')
   @ApiBearerAuth()
+  @ApiOkResponse({
+    type: EventResponsePaginationDto,
+  })
   @UseGuards(AuthGuard('jwt'))
-  getListEvents() {
-
+  getListEvents(
+    @User('id') userId: number,
+    @Query() paginate: PaginationDto,
+  ): Promise<EventResponsePaginationDto> {
+    return this.eventService.getEvents(userId, paginate);
   }
 
   @Get('event/:eventId')
   @ApiBearerAuth()
+  @ApiOkResponse({
+    type: EventResponseDto,
+  })
   @UseGuards(AuthGuard('jwt'))
   getEvent(
-    @Param('eventId', ParseIntPipe) id: number
-  ) {
+    @Param('eventId', ParseIntPipe) id: number,
+  ): Promise<EventResponseDto> {
+    return this.eventService.getEvent(id);
+  }
 
+  @Post('event')
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    type: EventResponseDto,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  createEvent(
+    @Body() body: CreateEventDto,
+  ): Promise<EventResponseDto> {
+    return this.eventService.createEvent(body);
   }
 
   @Patch('event/:eventId')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   updateEvent(
-    @Param('eventId', ParseIntPipe) id: number
+    @Param('eventId', ParseIntPipe) id: number,
+    @Body() body: UpdateEventDto,
   ) {
-
+    return this.eventService.updateEvent(id, body);
   }
 
   @Delete('event/:eventId')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   deleteEvent(
-    @Param('eventId', ParseIntPipe) id: number
+    @Param('eventId', ParseIntPipe) id: number,
   ) {
-
+    return this.eventService.deleteEvent(id);
   }
 }
