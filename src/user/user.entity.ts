@@ -3,10 +3,13 @@ import {
   Column,
   Entity,
   CreateDateColumn,
-  UpdateDateColumn, OneToMany,
+  UpdateDateColumn,
+  OneToMany,
+  AfterLoad
 } from 'typeorm';
 import { Role } from './role.enum';
 import { CategoryEntity } from '../category/category.entity';
+import { getLink } from '../core/storage';
 
 @Entity('users')
 export class UserEntity {
@@ -20,6 +23,18 @@ export class UserEntity {
     default: 0
   })
   account: number;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true
+  })
+  photo: string | null;
+
+  @AfterLoad()
+  getFullUrlForImage() {
+    if (this.photo) this.photo = getLink(this.photo);
+  }
 
   @Column({
     type: 'varchar',

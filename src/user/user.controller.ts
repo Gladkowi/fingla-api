@@ -1,21 +1,28 @@
 import {
   Body,
-  Controller, Delete, Get,
+  Controller,
+  Delete,
+  Get,
   Param,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
-  ApiBearerAuth,
-  ApiTags
+  ApiBearerAuth, ApiOkResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { LinkConfirmMailDto, SetNewPasswordDto } from './dtos/link.dto';
 import { User } from './decorators/user.decorator';
 import { ParamsDto } from './dtos/params.dto';
-
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { ApiImplicitFile } from '@nestjs/swagger/dist/decorators/api-implicit-file.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { saveFileToStorage } from '../core/storage';
 
 @ApiTags('User')
 @Controller('user')
@@ -25,7 +32,7 @@ export class UserController {
 
   @Post('/password/reset')
   generateLinkForResetPassword(
-    @Body() data: LinkConfirmMailDto
+    @Body() data: LinkConfirmMailDto,
   ) {
     return this.userService.getLinkForChangePassword(data.email);
   }
@@ -35,7 +42,7 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   generateLinkForChangeEmail(
     @User('id') id: number,
-    @Body() data: LinkConfirmMailDto
+    @Body() data: LinkConfirmMailDto,
   ) {
     return this.userService.getLinkForChangeEmail(id, data.email);
   }
@@ -44,7 +51,7 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   generateLinkForConfirmEmail(
-    @Body() data: LinkConfirmMailDto
+    @Body() data: LinkConfirmMailDto,
   ) {
     return this.userService.getLinkForConfirmEmail(data.email);
   }
@@ -52,30 +59,42 @@ export class UserController {
   @Patch('/resetPassword/:code')
   resetPasswordByCode(
     @Param() params: ParamsDto,
-    @Body() data: SetNewPasswordDto
+    @Body() data: SetNewPasswordDto,
   ) {
     return this.userService.confirmChangePassword(data, params.code);
   }
 
   @Patch('/changeEmail/:code')
   changeEmailByCode(
-    @Param() params: ParamsDto
+    @Param() params: ParamsDto,
   ) {
     return this.userService.confirmChangeEmail(params.code);
   }
 
   @Patch('/confirmEmail/:code')
   async confirmEmailByCode(
-    @Param() params: ParamsDto
+    @Param() params: ParamsDto,
   ) {
     return this.userService.confirmEmail(params.code);
   }
 
   @Patch('/profile')
   @ApiBearerAuth()
+  @ApiImplicitFile({
+    name: 'photo',
+    required: false,
+  })
+  @UseInterceptors(FileInterceptor('photo', saveFileToStorage))
   @UseGuards(AuthGuard('jwt'))
-  updateUser() {
-
+  updateUser(
+    @User('id') userId: number,
+    @Body() body: UpdateUserDto,
+    @UploadedFile() photo,
+  ) {
+    if (photo) {
+      body.photo = photo.filename;
+    }
+    return this.userService.updateUser(userId, body);
   }
 
   @Delete('')
@@ -87,7 +106,7 @@ export class UserController {
 
   @Post('/password/change')
   changePasswordForUser(
-    @Body() data: SetNewPasswordDto
+    @Body() data: SetNewPasswordDto,
   ) {
 
   }
@@ -98,6 +117,15 @@ export class UserController {
   getHomePages(
     @User('id') userId: number,
   ) {
-      return this.userService.getHomePage(userId);
+    return this.userService.getHomePage(userId);
+  }
+
+  @Get('/info')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  getUserInfoByToken(
+    @User('id') userId: number,
+  ) {
+    return this.userService.getUserInfoByToken(userId);
   }
 }

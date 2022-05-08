@@ -10,6 +10,7 @@ import { UserEntity } from './user.entity';
 import { ConfigService } from '../services/config/config.service';
 import { ChatEntity } from '../chat/chat.entity';
 import { CategoryEntity } from '../category/category.entity';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -150,6 +151,11 @@ export class UserService {
   }
 
   async getHomePage(userId: number) {
+    const date = new Date();
+    const year = date.getFullYear();
+    const start = date.getMonth();
+    const day = date.getUTCDate();
+
     const categories = await this.category
     .createQueryBuilder('c')
     .select([
@@ -165,6 +171,10 @@ export class UserService {
       id: userId,
     })
     .where('c.limit IS NOT NULL')
+    .andWhere('e.date BETWEEN :start AND :end ', {
+      start: `1-${start+1}-${year}`,
+      end: `${day}-${start+1}-${year}`
+    })
     .limit(6)
     .groupBy('c.id')
     .getRawMany();
@@ -175,7 +185,17 @@ export class UserService {
 
     return {
       categories,
-      chats
+      chats,
+      goals: [],
+      assets: []
     };
+  }
+
+  getUserInfoByToken(userId: number) {
+    return this.user.findOneOrFail({id: userId})
+  }
+
+  async updateUser(userId: number, body: UpdateUserDto) {
+    await this.user.update(userId, body);
   }
 }
