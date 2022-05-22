@@ -6,8 +6,8 @@ import {
   Param,
   ParseIntPipe, Patch,
   Post,
-  Query,
-  UseGuards,
+  Query, UploadedFile,
+  UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,6 +22,9 @@ import {
 } from './dtos/responses.dto';
 import { CreatePropertyDto } from './dtos/create-property.dto';
 import { UpdatePropertyDto } from './dtos/update-property.dto';
+import { ApiImplicitFile } from '@nestjs/swagger/dist/decorators/api-implicit-file.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { saveFileToStorage } from '../core/storage';
 
 @ApiTags('Assets')
 @Controller()
@@ -112,22 +115,40 @@ export class AssetController {
     type: PropertyResponseDto
   })
   @ApiBearerAuth()
+  @ApiImplicitFile({
+    name: 'preview',
+    required: false,
+  })
+  @UseInterceptors(FileInterceptor('preview', saveFileToStorage))
   @UseGuards(AuthGuard('jwt'))
   createProperty(
     @User('id') userId: number,
-    @Body() body: CreatePropertyDto
+    @Body() body: CreatePropertyDto,
+    @UploadedFile() preview
   ): Promise<PropertyResponseDto> {
+    if (preview) {
+      body.preview = preview.filename;
+    }
     body.userId = userId;
     return this.assetService.createProperty(body);
   }
 
   @Patch('property/:propertyId')
   @ApiBearerAuth()
+  @ApiImplicitFile({
+    name: 'preview',
+    required: false,
+  })
+  @UseInterceptors(FileInterceptor('preview', saveFileToStorage))
   @UseGuards(AuthGuard('jwt'))
   updateProperty(
     @Param('propertyId', ParseIntPipe) id: number,
-    @Body() body: UpdatePropertyDto
+    @Body() body: UpdatePropertyDto,
+    @UploadedFile() preview
   ) {
+    if (preview) {
+      body.preview = preview.filename;
+    }
     return this.assetService.updateProperty(id, body);
   }
 

@@ -11,6 +11,9 @@ import { ConfigService } from '../services/config/config.service';
 import { ChatEntity } from '../chat/chat.entity';
 import { CategoryEntity } from '../category/category.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { AssetEntity } from '../asset/asset.entity';
+import { GoalEntity } from '../goal/goal.entity';
+import { SpendEntity } from '../plannedSpend/spend.entity';
 
 @Injectable()
 export class UserService {
@@ -18,8 +21,11 @@ export class UserService {
     @InjectRepository(UserEntity) private user: Repository<UserEntity>,
     @InjectRepository(CategoryEntity) private category: Repository<CategoryEntity>,
     @InjectRepository(ChatEntity) private chat: Repository<ChatEntity>,
+    @InjectRepository(GoalEntity) private goal: Repository<GoalEntity>,
+    @InjectRepository(AssetEntity) private asset: Repository<AssetEntity>,
+    @InjectRepository(SpendEntity) private plannedSpend: Repository<SpendEntity>,
     private readonly mailerService: IBaseMailService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {
   }
 
@@ -28,40 +34,40 @@ export class UserService {
   }
 
   getUserById(id: number) {
-    return this.user.findOne(id)
+    return this.user.findOne(id);
   }
 
   async getLinkForConfirmEmail(email: string) {
-    const currentUser = await this.getUserByParam({email});
+    const currentUser = await this.getUserByParam({ email });
     if (!currentUser) {
       throw new NotFoundException();
     }
     let uniqueToken = UserService.getHexString(32);
-    while (await this.getUserByParam({email, emailConfirmCode: uniqueToken})) {
+    while (await this.getUserByParam({ email, emailConfirmCode: uniqueToken })) {
       uniqueToken = UserService.getHexString(32);
     }
     await this.user.update(currentUser.id, {
-        emailConfirmCode: uniqueToken
-      }
+        emailConfirmCode: uniqueToken,
+      },
     );
     this.mailerService.sendMail(
-      email, MailTypes.CONFIRM_EMAIL, uniqueToken
+      email, MailTypes.CONFIRM_EMAIL, uniqueToken,
     );
   }
 
   async confirmEmail(code: string) {
-    const currentUser = await this.getUserByParam({emailConfirmCode: code});
+    const currentUser = await this.getUserByParam({ emailConfirmCode: code });
     if (!currentUser) {
       throw new NotFoundException();
     }
     await this.user.update(currentUser.id, {
-        emailConfirmAt: new Date()
-      }
+        emailConfirmAt: new Date(),
+      },
     );
   }
 
   async getLinkForChangeEmail(id: number, email: string) {
-    const currentUser = await this.getUserByParam({id});
+    const currentUser = await this.getUserByParam({ id });
     if (!currentUser) {
       throw new NotFoundException();
     }
@@ -75,42 +81,42 @@ export class UserService {
     }
 
     let uniqueToken = UserService.getHexString(32);
-    while (await this.getUserByParam({id, emailChangeCode: uniqueToken})) {
+    while (await this.getUserByParam({ id, emailChangeCode: uniqueToken })) {
       uniqueToken = UserService.getHexString(32);
     }
 
     await this.user.update(id, {
       emailChangeAddress: email,
       emailChangeCode: uniqueToken,
-      emailChangeRequestedAt: () => 'CURRENT_TIMESTAMP'
+      emailChangeRequestedAt: () => 'CURRENT_TIMESTAMP',
     });
 
     this.mailerService.sendMail(
-      email, MailTypes.CHANGE_EMAIL, uniqueToken
+      email, MailTypes.CHANGE_EMAIL, uniqueToken,
     );
   }
 
   async getUserByParam(param: any) {
-    return await this.user.findOne({where: param});
+    return await this.user.findOne({ where: param });
   }
 
   async confirmChangeEmail(code: string) {
-    const currentUser = await this.getUserByParam({emailChangeCode: code});
+    const currentUser = await this.getUserByParam({ emailChangeCode: code });
     if (!currentUser) {
       throw new NotFoundException();
     }
     await this.user.update(
-      {emailChangeCode: code},
+      { emailChangeCode: code },
       {
         email: () => 'email_change_address',
         emailChangeAddress: null,
-        emailChangeCode: null
-      }
+        emailChangeCode: null,
+      },
     );
   }
 
   async getLinkForChangePassword(email: string) {
-    const currentUser = await this.getUserByParam({email});
+    const currentUser = await this.getUserByParam({ email });
     if (!currentUser) {
       throw new NotFoundException();
     }
@@ -124,39 +130,39 @@ export class UserService {
     }
 
     let uniqueToken = UserService.getHexString(32);
-    while (await this.getUserByParam({email, passwordResetCode: uniqueToken})) {
+    while (await this.getUserByParam({ email, passwordResetCode: uniqueToken })) {
       uniqueToken = UserService.getHexString(32);
     }
     await this.user.update(currentUser.id, {
       passwordResetCode: uniqueToken,
-      passwordResetRequestedAt: new Date()
+      passwordResetRequestedAt: new Date(),
     });
     this.mailerService.sendMail(
-      email, MailTypes.CHANGE_PASSWORD, uniqueToken
+      email, MailTypes.CHANGE_PASSWORD, uniqueToken,
     );
   }
 
   async confirmChangePassword(data: SetNewPasswordDto, code: string) {
-    const currentUser = await this.getUserByParam({passwordResetCode: code});
+    const currentUser = await this.getUserByParam({ passwordResetCode: code });
     if (!currentUser) {
       throw new NotFoundException();
     }
     return this.user.update(
-      {passwordResetCode: code},
+      { passwordResetCode: code },
       {
         password: await AuthService.getPasswordHash(data.password),
-        passwordResetCode: null
-      }
+        passwordResetCode: null,
+      },
     );
   }
 
   async getHomePage(userId: number) {
     const date = new Date();
     const year = date.getFullYear();
-    const start = date.getMonth();
+    const month = date.getMonth();
     const day = date.getUTCDate();
-    const startDate = `${year}-${start+1}-1`;
-    const endDate = `${year}-${start+1}-${day}`;
+    const startDate = `${year}-${month + 1}-1`;
+    const endDate = `${year}-${month + 1}-${day}`;
 
     const categories = await this.category
     .createQueryBuilder('c')
@@ -165,7 +171,7 @@ export class UserService {
       'c.name AS name',
       'c.limit AS limit',
       'c.preview AS preview',
-      'c.color AS color'
+      'c.color AS color',
     ])
     .addSelect('SUM(e.sum)', 'value')
     .leftJoin('c.events', 'e')
@@ -175,26 +181,83 @@ export class UserService {
     .where('c.limit IS NOT NULL')
     .andWhere('e.date BETWEEN :start AND :end ', {
       start: startDate,
-      end: endDate
+      end: endDate,
     })
     .limit(6)
     .groupBy('c.id')
     .getRawMany();
 
     const chats = await this.chat.find({
-      take: 6
+      relations: [
+        'users'
+      ],
+      where: {
+        id: userId,
+      },
+      take: 6,
+    });
+
+    const goals = await this.goal.find({
+      where: {
+        userId,
+      },
+      take: 6,
+    });
+
+    const assets = await this.asset.find({
+      where: {
+        userId,
+      },
+      take: 6,
     });
 
     return {
       categories,
       chats,
-      goals: [],
-      assets: []
+      goals,
+      assets,
     };
   }
 
-  getUserInfoByToken(userId: number) {
-    return this.user.findOneOrFail({id: userId})
+  async getUserInfoByToken(userId: number) {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getUTCDate();
+    const lastDayOfMonth = new Date(year, month + 1, 0).getUTCDate();
+    const startDate = `${year}-${month + 1}-${day}`;
+    const endDate = `${year}-${month + 1}-${lastDayOfMonth + 1}`;
+
+    const user = await this.user.findOneOrFail({
+      id: userId,
+    });
+
+    const planedSpendOneTime = await this.plannedSpend
+    .createQueryBuilder('s')
+    .select('SUM(s.cost)', 'sum')
+    .where('s.userId = :userId', {userId})
+    .andWhere('s.isMonthly = false')
+    .andWhere('s.date BETWEEN :start AND :end', {
+      start: startDate,
+      end: endDate
+    })
+    .getRawOne();
+
+    const planedSpendMoreTime = await this.plannedSpend
+    .createQueryBuilder('s')
+    .select('SUM(s.cost)', 'sum')
+    .where('s.userId = :userId', {userId})
+    .andWhere('s.isMonthly = true')
+    .andWhere('EXTRACT(DAY FROM s.date) BETWEEN :start AND :end', {
+      start: day,
+      end: lastDayOfMonth
+    })
+    .getRawOne();
+
+    return {
+      user,
+      spend: +planedSpendOneTime.sum + +planedSpendMoreTime.sum
+    };
   }
 
   async updateUser(userId: number, body: UpdateUserDto) {

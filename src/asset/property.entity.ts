@@ -1,13 +1,15 @@
 import {
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
+import { getLink } from '../core/storage';
 
 @Entity('property')
 export class PropertyEntity {
@@ -20,6 +22,11 @@ export class PropertyEntity {
     nullable: true
   })
   preview: string | null;
+
+  @AfterLoad()
+  getFullUrlForImage() {
+    if (this.preview) this.preview = getLink(this.preview);
+  }
 
   @Column({
     type: 'decimal'

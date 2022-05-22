@@ -15,6 +15,7 @@ import { getLink } from '../core/storage';
 import { ChatEntity } from '../chat/chat.entity';
 import { GoalEntity } from '../goal/goal.entity';
 import { AssetEntity } from '../asset/asset.entity';
+import { SpendEntity } from '../plannedSpend/spend.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -162,4 +163,10 @@ export class UserEntity {
     asset => asset.user
   )
   assets: AssetEntity[]
+
+  @OneToMany(
+    () => SpendEntity,
+    spend => spend.user
+  )
+  planedSpends: SpendEntity[]
 }

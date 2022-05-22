@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, HttpCode,
   Param,
   ParseIntPipe,
   Patch,
@@ -76,6 +76,7 @@ export class GoalController {
   }
 
   @Delete('goal/:goalId')
+  @HttpCode(204)
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   deleteGoal(
