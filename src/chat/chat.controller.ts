@@ -7,7 +7,8 @@ import {
   ParseArrayPipe,
   ParseIntPipe,
   Patch,
-  Post, UploadedFile,
+  Post,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -31,7 +32,7 @@ export class ChatController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   getFilteredListChats() {
-    return this.chatService.getChats();
+    // return this.chatService.getChats();
   }
 
   @Post('chat')

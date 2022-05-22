@@ -1,33 +1,30 @@
 import {
   Column,
   CreateDateColumn,
-  Entity, JoinColumn, ManyToOne,
+  Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 
-@Entity('goals')
-export class GoalEntity {
+@Entity('property')
+export class PropertyEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true
+  })
+  preview: string | null;
 
   @Column({
-    name: 'goal_total'
+    type: 'decimal'
   })
-  goalTotal: number;
-
-  @Column()
-  deadline: Date;
-
-  @Column({
-    name: 'current_total',
-    default: 0
-  })
-  currentTotal: number;
+  cost: number;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -42,7 +39,7 @@ export class GoalEntity {
 
   @ManyToOne(
     () => UserEntity,
-    user => user.goals,
+    user => user.assets,
   )
   @JoinColumn({
     name: 'user_id'

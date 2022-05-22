@@ -14,6 +14,7 @@ import {
   CreateSubCategoryDto,
 } from './dtos/create-category.dto';
 import { UpdateCategoryDto, UpdateSubCategoryDto } from './dtos/update-category.dto';
+import { DiagramDto } from './dtos/diagram.dto';
 
 @Injectable()
 export class CategoryService {
@@ -44,7 +45,7 @@ export class CategoryService {
     };
   }
 
-  getListCategoryWithSum(userId: number, paginate: PaginationDto) {
+  getListCategoryWithSum(userId: number, paginate: PaginationDto, q: DiagramDto) {
     return this.category
     .createQueryBuilder('c')
     .select([
@@ -57,6 +58,10 @@ export class CategoryService {
     .leftJoin('c.events', 'e')
     .where('user_id = :id', {
       id: userId,
+    })
+    .andWhere('e.date BETWEEN :start AND :end ', {
+      start: q.start,
+      end: q.end
     })
     .limit(paginate.limit)
     .offset(paginate.offset)

@@ -35,6 +35,7 @@ import { ApiImplicitFile } from '@nestjs/swagger/dist/decorators/api-implicit-fi
 import { FileInterceptor } from '@nestjs/platform-express';
 import { saveFileToStorage } from '../core/storage';
 import { User } from '../user/decorators/user.decorator';
+import { DiagramDto } from './dtos/diagram.dto';
 
 @ApiTags('Category')
 @Controller()
@@ -63,8 +64,9 @@ export class CategoryController {
   getListCategoriesForDiagram(
     @User('id') userId: number,
     @Query() paginate: PaginationDto,
+    @Query() query: DiagramDto
   ) {
-    return this.categoryService.getListCategoryWithSum(userId, paginate);
+    return this.categoryService.getListCategoryWithSum(userId, paginate, query);
   }
 
   @Get('category/:categoryId')

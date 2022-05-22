@@ -21,14 +21,16 @@ export class ChatService {
     });
   }
 
-  async getChats() {
+  async getChats(userId: number) {
     const [items, count] = await this.chat
     .createQueryBuilder('c')
+    .leftJoinAndSelect('c.users', 'u')
     .leftJoinAndMapOne(
       'c.messages',
       'c.messages',
       'msg',
       'msg.chat_id = c.id')
+    .where('u.id = :id', {id: userId})
     .limit(20)
     .offset(0)
     .getManyAndCount();

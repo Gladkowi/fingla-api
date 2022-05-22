@@ -7,6 +7,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './core/http.filter';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { AuthAdapter } from './adapter/auth.adapter';
 
 async function bootstrap() {
   const configApp = await NestFactory.create(ConfigModule);
@@ -21,7 +22,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: ['http://192.168.1.39:3000', 'http://localhost:3000', 'http://192.168.1.33:3000'],
+    origin: [
+      'http://192.168.1.39:3000',
+      'http://localhost:3000',
+      'http://192.168.1.33:3000',
+      'http://192.168.1.33',
+      'ws://192.168.1.33'
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -39,7 +46,7 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'storage'), {
     prefix: '/storage'
   });
-
+  app.useWebSocketAdapter(new AuthAdapter(app));
   await app.listen(configService.get('port'));
 }
 

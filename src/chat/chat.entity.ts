@@ -1,11 +1,15 @@
 import {
   Column,
   CreateDateColumn,
-  Entity, OneToMany,
+  Entity,
+  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinTable
 } from 'typeorm';
 import { MessageEntity } from './message/message.entity';
+import { UserEntity } from '../user/user.entity';
 
 @Entity('chats')
 export class ChatEntity {
@@ -37,4 +41,19 @@ export class ChatEntity {
       message => message.chat
   )
   messages: MessageEntity[];
+
+  @ManyToMany(
+    () => UserEntity,
+    user => user.chats
+  )
+  @JoinTable({
+    name: 'chat_user',
+    joinColumn: {
+      name: 'chat_id'
+    },
+    inverseJoinColumn: {
+      name: 'user_id'
+    }
+  })
+  users: UserEntity[];
 }

@@ -5,11 +5,16 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  AfterLoad
+  AfterLoad,
+  ManyToMany,
+  JoinTable
 } from 'typeorm';
 import { Role } from './role.enum';
 import { CategoryEntity } from '../category/category.entity';
 import { getLink } from '../core/storage';
+import { ChatEntity } from '../chat/chat.entity';
+import { GoalEntity } from '../goal/goal.entity';
+import { AssetEntity } from '../asset/asset.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -115,12 +120,6 @@ export class UserEntity {
   })
   passwordResetRequestedAt: Date;
 
-  @OneToMany(
-    () => CategoryEntity,
-    category => category.user
-  )
-  categories: CategoryEntity[]
-
   @CreateDateColumn({
     select: false
   })
@@ -130,4 +129,37 @@ export class UserEntity {
     select: false
   })
   updatedAt: Date;
+
+  @OneToMany(
+    () => CategoryEntity,
+    category => category.user
+  )
+  categories: CategoryEntity[]
+
+  @ManyToMany(
+    () => ChatEntity,
+    chat => chat.users
+  )
+  @JoinTable({
+    name: 'chat_user',
+    joinColumn: {
+      name: 'user_id'
+    },
+    inverseJoinColumn: {
+      name: 'chat_id'
+    }
+  })
+  chats: ChatEntity[];
+
+  @OneToMany(
+    () => GoalEntity,
+    goal => goal.user
+  )
+  goals: GoalEntity[]
+
+  @OneToMany(
+    () => AssetEntity,
+    asset => asset.user
+  )
+  assets: AssetEntity[]
 }

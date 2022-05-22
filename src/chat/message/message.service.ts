@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MessageEntity } from './message.entity';
 import { Repository } from 'typeorm';
 import { CreateMessageDto } from './dtos/create-message.dto';
+import { PaginationDto } from '../../core/dtos/pagination.dto';
 
 @Injectable()
 export class MessageService {
@@ -14,12 +15,17 @@ export class MessageService {
     return this.message.save(body)
   }
 
-  getMessages(id: number) {
-    return this.message.find({
+  getMessages(id: number, paginate: PaginationDto) {
+    return this.message.findAndCount({
+      skip: paginate.offset,
+      take: paginate.limit,
       where: {
         chatId: id
+      },
+      order: {
+        createdAt: 'DESC'
       }
-    })
+    });
   }
 
   deleteMessage(id: number) {

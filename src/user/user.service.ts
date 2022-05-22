@@ -155,6 +155,8 @@ export class UserService {
     const year = date.getFullYear();
     const start = date.getMonth();
     const day = date.getUTCDate();
+    const startDate = `${year}-${start+1}-1`;
+    const endDate = `${year}-${start+1}-${day}`;
 
     const categories = await this.category
     .createQueryBuilder('c')
@@ -172,8 +174,8 @@ export class UserService {
     })
     .where('c.limit IS NOT NULL')
     .andWhere('e.date BETWEEN :start AND :end ', {
-      start: `1-${start+1}-${year}`,
-      end: `${day}-${start+1}-${year}`
+      start: startDate,
+      end: endDate
     })
     .limit(6)
     .groupBy('c.id')
