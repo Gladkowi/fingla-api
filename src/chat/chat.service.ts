@@ -1,39 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatEntity } from './chat.entity';
-import { In, Repository } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { CreateChatDto } from './dtos/create-chat.dto';
+import { PaginationDto } from '../core/dtos/pagination.dto';
 
 @Injectable()
 export class ChatService {
   constructor(
-    @InjectRepository(ChatEntity) private chat: Repository<ChatEntity>,
-    @InjectRepository(UserEntity) private user: Repository<UserEntity>
+    @InjectRepository(ChatEntity)
+    private chat: Repository<ChatEntity>,
+    @InjectRepository(UserEntity)
+    private user: Repository<UserEntity>,
   ) {
   }
 
-  getUserForChat(userIds: number[]) {
+  getUserForChat(userPhones: string[]) {
     return this.user.find({
       where: {
-        id: In(userIds),
+        phone: In(userPhones),
       },
     });
   }
 
-  async getChats(userId: number) {
-    const [items, count] = await this.chat
-    .createQueryBuilder('c')
-    .leftJoinAndSelect('c.users', 'u')
-    .leftJoinAndMapOne(
-      'c.messages',
-      'c.messages',
-      'msg',
-      'msg.chat_id = c.id')
-    .where('u.id = :id', {id: userId})
-    .limit(20)
-    .offset(0)
-    .getManyAndCount();
+  async getChats(userId: number, paginate: PaginationDto) {
+    const [items, count] = await this.chat.findAndCount({
+      relations: ['messages', 'users'],
+      where: (qb: SelectQueryBuilder<UserEntity>) => {
+        qb.where('user_id = :userId', { userId });
+      },
+      skip: 0,
+      take: 20,
+    });
 
     return {
       items,
@@ -41,7 +40,22 @@ export class ChatService {
     };
   }
 
+  getChat(id: number) {
+    return this.chat.findOne(id);
+  }
+
   createChat(body: CreateChatDto) {
     return this.chat.save(body);
+  }
+
+  async checkAccess(userId: number, roomId: number): Promise<boolean> {
+    const result = await this.chat.findOne(roomId,{
+      relations: ['users'],
+      where: (qb: SelectQueryBuilder<UserEntity>) => {
+        qb.where('user_id = :userId', { userId });
+      },
+    });
+
+    return !!result;
   }
 }

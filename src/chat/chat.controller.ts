@@ -10,7 +10,7 @@ import {
   Post,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChatService } from './chat.service';
@@ -28,12 +28,6 @@ export class ChatController {
   ) {
   }
 
-  @Get('chats')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  getFilteredListChats() {
-    // return this.chatService.getChats();
-  }
 
   @Post('chat')
   @ApiBearerAuth()
@@ -80,30 +74,32 @@ export class ChatController {
 
   }
 
-  @Post('chat/:chatId')
+  @Post('chat/:chatId/new-user/:userId')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   addUserInChat(
-    @Param('chatId', ParseIntPipe) id: number,
+    @Param('chatId', ParseIntPipe) chatId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ) {
 
   }
 
-  @Post('chat/:chatId')
+  @Post('chat/:chatId/remove-user/:userId')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   leaveFromChat(
-    @Param('chatId', ParseIntPipe) id: number,
+    @Param('chatId', ParseIntPipe) chatId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ) {
 
   }
 
-  @Post('chat/:chatId/users')
+  @Post('chat/users/info')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   getUsersForChat(
-    @Body('userIds', ParseArrayPipe) userIds: number[],
+    @Body('userPhones', ParseArrayPipe) userPhones: string[],
   ) {
-    return this.chatService.getUserForChat(userIds);
+    return this.chatService.getUserForChat(userPhones);
   }
 }

@@ -8,11 +8,13 @@ import { PaginationDto } from '../../core/dtos/pagination.dto';
 @Injectable()
 export class MessageService {
   constructor(
-    @InjectRepository(MessageEntity) private message: Repository<MessageEntity>
-  ) { }
+    @InjectRepository(MessageEntity)
+    private message: Repository<MessageEntity>,
+  ) {
+  }
 
   createMessage(body: CreateMessageDto) {
-    return this.message.save(body)
+    return this.message.save(body);
   }
 
   getMessages(id: number, paginate: PaginationDto) {
@@ -20,15 +22,21 @@ export class MessageService {
       skip: paginate.offset,
       take: paginate.limit,
       where: {
-        chatId: id
+        chatId: id,
       },
       order: {
-        createdAt: 'DESC'
-      }
+        createdAt: 'DESC',
+      },
     });
   }
 
-  deleteMessage(id: number) {
-    return this.message.delete(id)
+  async deleteMessage(id: number, userId: number) {
+    const result = await this.message.findOne({
+      where: {
+        id: id,
+        author: userId
+      },
+    });
+    if(result) await this.message.delete(result.id);
   }
 }

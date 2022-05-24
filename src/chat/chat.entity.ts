@@ -6,10 +6,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  JoinTable
+  JoinTable, AfterLoad,
 } from 'typeorm';
 import { MessageEntity } from './message/message.entity';
 import { UserEntity } from '../user/user.entity';
+import { getLink } from '../core/storage';
 
 @Entity('chats')
 export class ChatEntity {
@@ -23,6 +24,11 @@ export class ChatEntity {
     nullable: true
   })
   preview: string;
+
+  @AfterLoad()
+  getFullUrlForImage() {
+    if (this.preview) this.preview = getLink(this.preview);
+  }
 
   @CreateDateColumn({
     type: 'timestamptz',

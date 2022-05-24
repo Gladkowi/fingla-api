@@ -6,12 +6,10 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
-import { Socket, Server } from 'socket.io';
+import { Server } from 'socket.io';
 import { MessageService } from './message.service';
-import { AuthService } from '../../auth/auth.service';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { ChatService } from '../chat.service';
-import { HelperService } from '../../services/helper/helper.service';
 import { ParseIntPipe } from '@nestjs/common';
 import { CustomSocket } from '../../adapter/auth.adapter';
 import { PaginationDto } from '../../core/dtos/pagination.dto';
@@ -26,72 +24,66 @@ export class MessageGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  connectedUsers: number[] = [];
+  connectedUsers: { roomId: number, phone: string[] }[] = [];
 
   constructor(
     private chatService: ChatService,
-    private messageService: MessageService,
-    private authService: AuthService,
-    private helperService: HelperService
+    private messageService: MessageService
   ) {
-  }
-
-  async handleConnection(
-    @ConnectedSocket() client: CustomSocket
-  ) {
-    // const bearerJwt = client.handshake.auth.token;
-    // const user = await this.authService.verifyJwt(bearerJwt).catch(error => {
-    //   client.disconnect();
-    // });
-    // if (!user) {
-    //   return
-    // }
-    // this.connectedUsers = [...this.connectedUsers, user.userid];
-    // this.server.emit('users', this.connectedUsers);
-
-
   }
 
   async handleDisconnect(
-    @ConnectedSocket() client: CustomSocket
+    @ConnectedSocket() client: CustomSocket,
   ) {
-    // const bearerJwt = client.handshake.auth.token;
-    // const user = await this.authService.verifyJwt(bearerJwt).catch(error => {
-    //   client.disconnect();
-    // });
-    // if (!user) {
-    //   return
-    // }
-    // const userPos = this.connectedUsers.indexOf(user.userid);
-    // if (userPos > -1) {
-    //   this.connectedUsers = [
-    //     ...this.connectedUsers.slice(0, userPos),
-    //     ...this.connectedUsers.slice(userPos + 1),
-    //   ];
-    // }
-    // this.server.emit('users', this.connectedUsers);
     client.emit('rooms', {
       user: client.user.phone,
-      event: 'left'
+      event: 'left',
     });
   }
 
   @SubscribeMessage('join')
   async enterChatRoom(client: CustomSocket, roomId: string) {
-    client.join(roomId)
+    const result = await this.chatService.checkAccess(client.user.userid, +roomId);
+    if(!result) client.disconnect();
+    client.join(roomId);
     client.to(roomId).emit('rooms', {
       user: client.user.phone,
-      event: 'joined'
+      event: 'joined',
     });
+    let trueOrFalse = false;
+    const users = this.connectedUsers;
+    this.connectedUsers.find((item, key) => {
+      if (item.roomId == +roomId) {
+        trueOrFalse = true;
+        users[key].phone.push(client.user.phone);
+        this.connectedUsers = [...users];
+        this.server.to(roomId).emit('users', users[key].phone);
+      }
+    });
+    if(!trueOrFalse){
+      users.push({ roomId: +roomId, phone: [client.user.phone] });
+      this.connectedUsers = [...users];
+      this.server.to(roomId).emit('users',[client.user.phone]);
+    }
+    const room = await this.chatService.getChat(+roomId);
+    this.server.to(roomId).emit('room', room);
   }
 
   @SubscribeMessage('leave')
   async leaveChatRoom(client: CustomSocket, roomId: string) {
     client.broadcast.to(roomId).emit('rooms', {
       user: client.user.phone,
-      event: 'left'
+      event: 'left',
     });
     client.leave(roomId);
+    let users = this.connectedUsers;
+    this.connectedUsers.find((item, key) => {
+      if (item.roomId == +roomId) {
+        users[key].phone = users[key].phone.filter((item) => item !== client.user.phone);
+        this.connectedUsers = [...users];
+        this.server.to(roomId).emit('users', users[key].phone);
+      }
+    });
   }
 
   @SubscribeMessage('messages:get')
@@ -101,9 +93,9 @@ export class MessageGateway implements OnGatewayDisconnect {
     @MessageBody() paginate: PaginationDto,
   ) {
     const [items, count] = await this.messageService.getMessages(id, paginate);
-    this.server.to(id.toString()).emit('messages', {
-      items: items,
-      count
+    client.emit('messages', {
+      items,
+      count,
     });
   }
 
@@ -115,7 +107,7 @@ export class MessageGateway implements OnGatewayDisconnect {
     const result = await this.messageService.createMessage({
       text: payload.text,
       author: client.user.userid,
-      chatId: payload.chatId
+      chatId: payload.chatId,
     });
     this.server.to(payload.chatId.toString()).emit('message:one', result);
   }
@@ -126,19 +118,18 @@ export class MessageGateway implements OnGatewayDisconnect {
     @MessageBody('id', ParseIntPipe) id: number,
     @MessageBody('chatId', ParseIntPipe) chatId: number,
   ) {
-    await this.messageService.deleteMessage(id).then(() => {
+    await this.messageService.deleteMessage(id, client.user.userid).then(() => {
       this.server.to(chatId.toString()).emit('remove', id);
     });
   }
 
-
   @SubscribeMessage('chats:get')
   async getChats(
     @ConnectedSocket() client: CustomSocket,
-    @MessageBody() data: any
+    @MessageBody() paginate: PaginationDto,
   ) {
-    const result = await this.chatService.getChats(5);
-    this.server.emit('chats', result.items);
+    const result = await this.chatService.getChats(client.user.userid, paginate);
+    client.emit('chats', result.items);
   }
 }
 

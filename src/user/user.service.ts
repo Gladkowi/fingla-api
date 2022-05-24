@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
 import { TooManyRequest } from '../core/http.exceptions';
@@ -188,11 +188,9 @@ export class UserService {
     .getRawMany();
 
     const chats = await this.chat.find({
-      relations: [
-        'users'
-      ],
-      where: {
-        id: userId,
+      relations: ['users'],
+      where: (qb: SelectQueryBuilder<UserEntity>) => {
+        qb.where('user_id = :userId', { userId });
       },
       take: 6,
     });
