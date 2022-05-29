@@ -1,5 +1,5 @@
 import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
-import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsDecimal, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateEventDto {
   @ApiModelProperty()
@@ -8,7 +8,7 @@ export class CreateEventDto {
   comment: string;
 
   @ApiModelProperty()
-  @IsNumber()
+  @IsDecimal()
   sum: number;
 
   @ApiModelProperty()

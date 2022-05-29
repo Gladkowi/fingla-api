@@ -23,7 +23,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
-      'http://192.168.1.39:3000',
+      'http://192.168.1.41:3000',
       'http://localhost:3000',
       'http://192.168.1.33:3000',
       'http://192.168.1.33',

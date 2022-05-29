@@ -121,9 +121,14 @@ export class UserEntity {
   })
   passwordResetRequestedAt: Date;
 
-  @CreateDateColumn({
-    select: false
+  @Column({
+    type: 'date',
+    name: 'banned_at',
+    nullable: true
   })
+  bannedAt: Date | null;
+
+  @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn({

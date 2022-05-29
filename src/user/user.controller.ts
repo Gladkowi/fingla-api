@@ -23,6 +23,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { ApiImplicitFile } from '@nestjs/swagger/dist/decorators/api-implicit-file.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { saveFileToStorage } from '../core/storage';
+import { BanStatusGuard } from '../auth/guards/banstatus.guard';
 
 @ApiTags('User')
 @Controller('user')
@@ -113,7 +114,7 @@ export class UserController {
 
   @Get('/home')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), BanStatusGuard)
   getHomePages(
     @User('id') userId: number,
   ) {
@@ -122,7 +123,7 @@ export class UserController {
 
   @Get('/info')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), BanStatusGuard)
   getUserInfoByToken(
     @User('id') userId: number,
   ) {

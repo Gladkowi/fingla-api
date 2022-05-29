@@ -20,13 +20,12 @@ export class EventEntity {
     length: 150,
     nullable: true
   })
-  comment: string | null
+  comment: string | null;
 
   @Column({
-    type: 'decimal',
-    nullable: true
+    type: 'decimal'
   })
-  sum: number
+  sum: number;
 
   @ManyToOne(
     () => CategoryEntity,
