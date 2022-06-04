@@ -60,8 +60,9 @@ export class EventController {
   @UseGuards(AuthGuard('jwt'))
   createEvent(
     @Body() body: CreateEventDto,
-  ): Promise<EventResponseDto> {
-    return this.eventService.createEvent(body);
+    @User('id') userId: number,
+  ) {
+    return this.eventService.createEvent(userId, body);
   }
 
   @Patch('event/:eventId')

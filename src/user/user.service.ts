@@ -14,6 +14,8 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { AssetEntity } from '../asset/asset.entity';
 import { GoalEntity } from '../goal/goal.entity';
 import { SpendEntity } from '../plannedSpend/spend.entity';
+import { PropertyEntity } from '../asset/property.entity';
+import { format, lastDayOfMonth, startOfMonth } from 'date-fns';
 
 @Injectable()
 export class UserService {
@@ -24,6 +26,7 @@ export class UserService {
     @InjectRepository(GoalEntity) private goal: Repository<GoalEntity>,
     @InjectRepository(AssetEntity) private asset: Repository<AssetEntity>,
     @InjectRepository(SpendEntity) private plannedSpend: Repository<SpendEntity>,
+    @InjectRepository(PropertyEntity) private property: Repository<PropertyEntity>,
     private readonly mailerService: IBaseMailService,
     private readonly configService: ConfigService,
   ) {
@@ -157,12 +160,8 @@ export class UserService {
   }
 
   async getHomePage(userId: number) {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getUTCDate();
-    const startDate = `${year}-${month + 1}-1`;
-    const endDate = `${year}-${month + 1}-${day}`;
+    const endDate = lastDayOfMonth(new Date());
+    const startDate = startOfMonth(new Date());
 
     const categories = await this.category
     .createQueryBuilder('c')
@@ -175,10 +174,10 @@ export class UserService {
     ])
     .addSelect('SUM(e.sum)', 'value')
     .leftJoin('c.events', 'e')
-    .where('user_id = :id', {
-      id: userId,
+    .where('c.user_id = :userId', {
+      userId,
     })
-    .where('c.limit IS NOT NULL')
+    .andWhere('c.limit IS NOT NULL')
     .andWhere('e.date BETWEEN :start AND :end ', {
       start: startDate,
       end: endDate,
@@ -202,29 +201,34 @@ export class UserService {
       take: 6,
     });
 
-    const assets = await this.asset.find({
-      where: {
-        userId,
-      },
-      take: 6,
-    });
+    const assets = await this.asset
+    .createQueryBuilder('a')
+    .select('SUM(a.cost * a.count)', 'sum')
+    .where('a.user_id = :userId', {
+      userId,
+    })
+    .getRawOne();
+
+    const property = await this.property
+    .createQueryBuilder('p')
+    .select('SUM(p.cost)', 'sum')
+    .where('p.user_id = :userId', {
+      userId,
+    })
+    .getRawOne();
 
     return {
       categories,
       chats,
       goals,
-      assets,
+      assets: +assets.sum,
+      property: +property.sum,
     };
   }
 
   async getUserInfoByToken(userId: number) {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getUTCDate();
-    const lastDayOfMonth = new Date(year, month + 1, 0).getUTCDate();
-    const startDate = `${year}-${month + 1}-${day}`;
-    const endDate = `${year}-${month + 1}-${lastDayOfMonth + 1}`;
+    const endDate = lastDayOfMonth(new Date());
+    const startDate = new Date();
 
     const user = await this.user.findOneOrFail({
       id: userId,
@@ -233,28 +237,28 @@ export class UserService {
     const planedSpendOneTime = await this.plannedSpend
     .createQueryBuilder('s')
     .select('SUM(s.cost)', 'sum')
-    .where('s.userId = :userId', {userId})
+    .where('s.userId = :userId', { userId })
     .andWhere('s.isMonthly = false')
     .andWhere('s.date BETWEEN :start AND :end', {
       start: startDate,
-      end: endDate
+      end: endDate,
     })
     .getRawOne();
 
     const planedSpendMoreTime = await this.plannedSpend
     .createQueryBuilder('s')
     .select('SUM(s.cost)', 'sum')
-    .where('s.userId = :userId', {userId})
+    .where('s.userId = :userId', { userId })
     .andWhere('s.isMonthly = true')
     .andWhere('EXTRACT(DAY FROM s.date) BETWEEN :start AND :end', {
-      start: day,
-      end: lastDayOfMonth
+      start: format(startDate, 'dd'),
+      end: format(endDate, 'dd'),
     })
     .getRawOne();
 
     return {
       user,
-      spend: +planedSpendOneTime.sum + +planedSpendMoreTime.sum
+      spend: +planedSpendOneTime.sum + +planedSpendMoreTime.sum,
     };
   }
 

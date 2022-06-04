@@ -9,6 +9,7 @@ import { CategoryEntity } from '../category/category.entity';
 import { GoalEntity } from '../goal/goal.entity';
 import { AssetEntity } from '../asset/asset.entity';
 import { SpendEntity } from '../plannedSpend/spend.entity';
+import { PropertyEntity } from '../asset/property.entity';
 
 
 @Module({
@@ -20,7 +21,8 @@ import { SpendEntity } from '../plannedSpend/spend.entity';
       CategoryEntity,
       GoalEntity,
       AssetEntity,
-      SpendEntity
+      SpendEntity,
+      PropertyEntity
     ])
   ],
   controllers: [UserController],

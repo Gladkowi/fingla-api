@@ -37,6 +37,7 @@ export class CreateSubCategoryDto {
   preview: string | null;
 
   @ApiModelProperty()
+  @IsNumber()
   categoryId: number;
 
   @ApiModelProperty()

@@ -1,5 +1,6 @@
 import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
-import { IsDateString } from 'class-validator';
+import { IsDateString, IsEnum } from 'class-validator';
+import { CategoryTypeEnum } from '../enums/category-type.enum';
 
 export class DiagramDto {
   @ApiModelProperty()
@@ -9,4 +10,11 @@ export class DiagramDto {
   @ApiModelProperty()
   @IsDateString()
   end: Date;
+
+  @ApiModelProperty({
+    type: Object.keys(CategoryTypeEnum),
+    example: CategoryTypeEnum.EXPENSE
+  })
+  @IsEnum(CategoryTypeEnum)
+  type: CategoryTypeEnum;
 }

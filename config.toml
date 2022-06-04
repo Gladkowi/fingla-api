@@ -1,7 +1,7 @@
 env = "development"
-port = "5000"
+port = "4000"
 tz = "utc"
-main_url = "http://192.168.1.33:5000/api"
+main_url = "http://192.168.1.33:4000/api"
 frontend_url = "http://192.168.1.33:3000"
 
 [jwt]

@@ -56,12 +56,15 @@ export class CategoryService {
     ])
     .addSelect('SUM(e.sum)', 'value')
     .leftJoin('c.events', 'e')
-    .where('user_id = :id', {
-      id: userId,
+    .where('c.user_id = :userId', {
+      userId,
     })
     .andWhere('e.date BETWEEN :start AND :end ', {
       start: q.start,
       end: q.end
+    })
+    .andWhere('c.type = :type', {
+      type: q.type
     })
     .limit(paginate.limit)
     .offset(paginate.offset)
@@ -75,7 +78,7 @@ export class CategoryService {
 
   getCategory(id: number): Promise<CategoryResponseDto> {
     return this.category.findOneOrFail(id, {
-      relations: ['subCategory'],
+      relations: ['subCategories'],
     });
   }
 

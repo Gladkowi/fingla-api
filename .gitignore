@@ -7,5 +7,5 @@ temp/
 dist/*
 storage
 error.log
-.config.toml
+config.toml
 ormconfig.json
